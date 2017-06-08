@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+working_dir/*
+!working_dir/.gitkeep
+word2vec.txt

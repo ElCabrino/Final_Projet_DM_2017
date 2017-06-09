@@ -2,6 +2,7 @@ import csv
 import string
 import os
 import shutil
+import re
 
 """this function delete the content of the working_dir/ folder"""
 def rm_working_dir_content():
@@ -15,9 +16,6 @@ def rm_stopwords(user_input, stop_words):
 
 """general function that format a review"""
 #T0D0: version avec le title
-#+ y a un cas ou quand on a {mot}.{mot} et que j'enleve le .
-#j'ai donc {mot}{mot} et donc l'algo les 2 mots mots comme un seul
-#ca fausse un peu le bag of words 
 def read_format_review(from_path, to_path, title=False):
 	#I use this to remove punctuation
 	translator=str.maketrans('','',string.punctuation)
@@ -31,7 +29,9 @@ def read_format_review(from_path, to_path, title=False):
 		reader =  csv.DictReader(csvfile, delimiter = "\t")
 		for row in reader:
 			if not row['review']==None:
-				for word in row['review'].translate(translator).split():
+				#formating the review to remove some rare case
+				row_formatted = rm_rare_case(row['review'])
+				for word in row_formatted.translate(translator).split():
 					if word not in stop:
 						file.write(word+" ")
 				file.write('\n')
@@ -58,6 +58,7 @@ def read_format_all_reviews(to_path):
 				shutil.copyfileobj(revd, reviews_file)
 			os.remove(rev)
 
+"""convert the reviews in reviews_path in a bag of word representation in to_path"""
 def reviews_to_bag_of_words(reviews_path, to_path):
 	bag_of_words = open(to_path, "w+")
 	dictionnary = []
@@ -84,6 +85,13 @@ def reviews_to_bag_of_words(reviews_path, to_path):
 				i = dictionnary.index(word)
 				bag_of_words.write(str(occurences[i])+" ")
 			bag_of_words.write("\n")
+
+"""function that takes a string as parameter and remove all the pattern that looks like
+ {word}.{word} or {word},{word} ..."""
+def rm_rare_case(review):
+	review = re.sub("(\s)([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
+	review = re.sub("([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
+	return review
 
 
 

@@ -111,6 +111,24 @@ def get_X_size(bag_of_words_path):
 		size_X_str = f.readline().split()
 		size_X = [int(i) for i in size_X_str]
 	return size_X
+
+def get_X(bag_of_words_path):
+	[n, d] = get_X_size(bag_of_words_path)
+	X = np.zeros((n, d))
+	itLine = 0
+	itCol = 0
+	with open(bag_of_words_path, "r") as bag_of_words_f:
+		#jumping the first line because it's the size of X
+		bag_of_words_f.readline()
+		for review in bag_of_words_f:
+			for number in review.split():
+				X[itLine, itCol] = int(number)
+				itCol+=1
+			itCol=0
+			itLine+=1
+
+	return X
+
 		
 			
 

@@ -10,4 +10,4 @@ if __name__ == '__main__':
 
 	read_format_all_reviews(reviews_path)
 	reviews_to_bag_of_words(reviews_path, bag_of_words_path)
-	size_X = get_X_size(bag_of_words_path)
+	X = get_X(bag_of_words_path)

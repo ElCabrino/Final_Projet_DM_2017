@@ -3,6 +3,8 @@ import string
 import os
 import shutil
 import re
+import sys
+import numpy as np
 
 """this function delete the content of the working_dir/ folder"""
 def rm_working_dir_content():
@@ -42,6 +44,8 @@ def read_format_review(from_path, to_path, title=False):
 
 """function to read and format all the reviews of this tp"""
 def read_format_all_reviews(to_path):
+	if os.path.exists(to_path):
+		return
 	files = ['datasets/reviews_always.csv','datasets/reviews_gillette.csv','datasets/reviews_oral-b.csv','datasets/reviews_pantene.csv','datasets/reviews_tampax.csv']
 	reviews = ['working_dir/reviews1.txt', 'working_dir/reviews2.txt', 'working_dir/reviews3.txt', 'working_dir/reviews4.txt', 'working_dir/reviews5.txt']
 	#reading all the reviews
@@ -58,15 +62,20 @@ def read_format_all_reviews(to_path):
 				shutil.copyfileobj(revd, reviews_file)
 			os.remove(rev)
 
-"""convert the reviews in reviews_path in a bag of word representation in to_path"""
+"""convert the reviews in reviews_path in a bag of word representation in to_path
+	return the number of reviews"""
 def reviews_to_bag_of_words(reviews_path, to_path):
+	if os.path.exists(to_path):
+		return
 	bag_of_words = open(to_path, "w+")
 	dictionnary = []
 	occurences = []
+	n_reviews = 0
 
 	#we count the occurence of each word of the dictionnary
 	with open(reviews_path, "r") as reviews:
 		for rev in reviews:
+			n_reviews+=1
 			for word in rev.split():
 				#print(word)
 				#if we know this word we simply add one to the occurences
@@ -78,8 +87,12 @@ def reviews_to_bag_of_words(reviews_path, to_path):
 					dictionnary.append(word)
 					occurences.append(1)
 
+	dict_size = len(dictionnary)
+
 	#we re-open it to do the bag of words algorithm
 	with open(reviews_path, "r") as reviews:
+		#i write the size of the matrix X that is constructed with this file
+		bag_of_words.write(str(n_reviews) + " " +str(dict_size)+"\n")
 		for rev in reviews:
 			for word in rev.split():
 				i = dictionnary.index(word)
@@ -92,6 +105,15 @@ def rm_rare_case(review):
 	review = re.sub("(\s)([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
 	review = re.sub("([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
 	return review
+
+def get_X_size(bag_of_words_path):
+	with open(bag_of_words_path, 'r') as f:
+		size_X_str = f.readline().split()
+		size_X = [int(i) for i in size_X_str]
+	return size_X
+		
+			
+
 
 
 

@@ -129,6 +129,43 @@ def get_X(bag_of_words_path):
 
 	return X
 
+"""general function that format a rating"""
+#T0D0: version avec le title
+def read_format_rating(from_path, to_path):
+	file = open(to_path,"w+")
+	count=0
+
+	#reading the csv, removing punctuations and stop words
+	with open(from_path) as csvfile:
+		reader =  csv.DictReader(csvfile, delimiter = "\t")
+		for row in reader:
+			if not row['user_rating']==None:
+				score = row['user_rating']
+				print(score)
+				print(count)
+				file.write(score)
+				count+=1
+				file.write('\n')
+
+"""function to read and format all the rating of this tp"""
+def read_format_all_ratings(to_path):
+	if os.path.exists(to_path):
+		return
+	files = ['datasets/reviews_always.csv','datasets/reviews_gillette.csv','datasets/reviews_oral-b.csv','datasets/reviews_pantene.csv','datasets/reviews_tampax.csv']
+	ratings = ['working_dir/ratings1.txt', 'working_dir/ratings2.txt', 'working_dir/ratings3.txt', 'working_dir/ratings4.txt', 'working_dir/ratings5.txt']
+	#reading all the reviews
+	read_format_rating(files[0], ratings[0])
+	read_format_rating(files[1], ratings[1])
+	read_format_rating(files[2], ratings[2])
+	read_format_rating(files[3], ratings[3])
+	read_format_rating(files[4], ratings[4])
+
+	#concatenating in one single file
+	with open(to_path,'wb') as ratings_file:
+		for rate in ratings:
+			with open(rate,'rb') as rated:
+				shutil.copyfileobj(rated, ratings_file)
+			os.remove(rate)
 		
 			
 

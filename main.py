@@ -9,7 +9,7 @@ if __name__ == '__main__':
     # reading options
     if '-rm_working_dir' in sys.argv:
         rm_working_dir_content()
-
+    """
     # construction de X (a refaire)
     read_format_all_reviews(reviews_path)
     reviews_to_bag_of_words(reviews_path, bag_of_words_path)
@@ -21,3 +21,7 @@ if __name__ == '__main__':
 
     Z = get_Z(word2vec_path)
     print(Z)
+    """
+
+    read_format_all_reviews(reviews_path)
+    create_stem_dict('dictionnary.txt', reviews_path)

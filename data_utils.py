@@ -4,6 +4,7 @@ import os
 import shutil
 import re
 import sys
+import linecache
 import numpy as np
 
 """this function delete the content of the working_dir/ folder"""
@@ -14,17 +15,13 @@ def rm_working_dir_content():
     os.makedirs('working_dir')
     open('working_dir/.gitkeep', 'a').close()
 
-"""function that remove stop words in user_input found in stop_words"""
-
-
-def rm_stopwords(user_input, stop_words):
-    return list(set(user_input) - set(stop_words))
 
 """general function that format a review"""
 # T0D0: version avec le title
 
 
 def read_format_review(from_path, to_path, title=False):
+    print('Formating and removing stopwords of ' + from_path + '...', end='')
     # I use this to remove punctuation
     translator = str.maketrans('', '', string.punctuation)
     file = open(to_path + '.tmp', "w+")
@@ -41,19 +38,24 @@ def read_format_review(from_path, to_path, title=False):
                 # formating the review to remove some rare case
                 row_formatted = rm_rare_case(row['review'])
                 for word in row_formatted.translate(translator).split():
-                    if word not in stop:
+                    # removing stopwords
+                    if not word.lower() in stop:
                         file.write(word + " ")
                 file.write('\n')
+
     # doing steemin
     os.system('./stemmer.pl < ' + to_path + '.tmp' + ' > ' + to_path)
     # removing tmp file
     os.remove(to_path + '.tmp')
+    print(' Done!')
 
 """function to read and format all the reviews of this tp"""
 
 
 def read_format_all_reviews(to_path):
+    print('Creating ' + to_path)
     if os.path.exists(to_path):
+        print(to_path + ' already existing.')
         return
     files = ['datasets/reviews_always.csv', 'datasets/reviews_gillette.csv',
              'datasets/reviews_oral-b.csv', 'datasets/reviews_pantene.csv', 'datasets/reviews_tampax.csv']
@@ -72,6 +74,7 @@ def read_format_all_reviews(to_path):
             with open(rev, 'rb') as revd:
                 shutil.copyfileobj(revd, reviews_file)
             os.remove(rev)
+    print(to_path + ' created!')
 
 """convert the reviews in reviews_path in a bag of word representation in to_path
 	return the number of reviews"""
@@ -232,3 +235,66 @@ def get_Z(word2vec_path):
             itLine += 1
             itCol = 0
     return Z
+
+
+def create_stem_dict(dictionnary_path, reviews_path):
+        # doing steemin
+    print('Doing stemming on the dictionnary...', end='')
+    os.system('./stemmer.pl < ' + dictionnary_path +
+              ' > ' + 'dictionnary_stem.tmp')
+    print(' Done!')
+    print('Removing duplicate words in the dictionnary...', end='')
+
+    count = 1
+    lines = 0
+    f_stem_index = open('dictionnary_stem.txt', 'w+')
+    unique_words = []
+    # on enleve les doublons
+    with open('dictionnary_stem.tmp', 'r+') as f_stem:
+        size = f_stem.readline()
+        for line in f_stem:
+            word = line.split()[0]
+            if not word in unique_words:
+                f_stem_index.write(line[:-1] + ' ' + str(count) + '\n')
+                unique_words.append(word)
+                lines += 1
+            count += 1
+    os.remove('dictionnary_stem.tmp')
+    print(' Done!')
+
+    # on regarde tout les mots dans reviews.txt
+    print('Removing words that are not in ' + reviews_path + '...', end='')
+    unique_words_reviews = []
+    with open(reviews_path, 'r') as reviews_f:
+        for line in reviews_f:
+            for word in line.split():
+                if not word in unique_words_reviews:
+                    unique_words_reviews.append(word)
+
+    f_stem_final = open('dictionnary_final.txt', 'w+')
+    f_stem_index.seek(0, 0)
+    size = 0
+    for line in f_stem_index:
+        word = line.split()[0]
+        if word in unique_words_reviews:
+            f_stem_final.write(line)
+            size += 1
+    print(' Done!')
+
+    print('Mapping vectors from word2vec our dictionnary ...', end='')
+    f_stem_final.seek(0,0)
+    nb_col = open('word2vec.txt', 'r').readline().split()[1]
+    f_word2vec_stem = open('word2vec_stem.txt', 'w+')
+    f_word2vec_stem.write(str(size) + ' ' + nb_col + '\n')
+    for line in f_stem_final:
+    	index = int(line.split()[1]) + 1
+    	line_word2vec = linecache.getline('word2vec.txt', index)
+    	line_to_write = line.split()[0] 
+    	for word in line_word2vec.split()[1:]:
+    		line_to_write += ' ' + word
+    	line_to_write += '\n'
+    	f_word2vec_stem.write(line_to_write)
+    print(' Done!')
+    os.remove('dictionnary_final.txt')
+    os.remove('dictionnary_stem.txt')
+

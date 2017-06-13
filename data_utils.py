@@ -182,6 +182,31 @@ def get_Y(rating_path):
 			itLine+=1
 
 	return Y
+
+def get_Z_size(word2vec_path):
+	with open(word2vec_path, 'r') as f:
+		size_Z_str = f.readline().split()
+		size_Z = int(size_Z_str[0])
+	return size_Z
+
+def get_Z(word2vec_path):
+	d = get_Z_size(word2vec_path)
+	Z = np.zeros((d, 200))
+	itLine=0
+	itCol=0
+	with open(word2vec_path, 'r') as word2vec:
+		word2vec.readline()
+		for line in word2vec:
+			#print(line.split()[1:])
+			for val in line.split()[1:]:
+				Z[itLine, itCol] = float(val)
+				itCol += 1
+			itLine += 1
+			itCol = 0
+	return Z
+
+
+
 			
 
 

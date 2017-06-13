@@ -6,18 +6,18 @@ ratings_path = 'working_dir/ratings.txt'
 word2vec_path = 'word2vec.txt'
 
 if __name__ == '__main__':
-	#reading options
-	if '-rm_working_dir' in sys.argv:
-		rm_working_dir_content()
-	"""
-	#construction de X (a refaire)
-	read_format_all_reviews(reviews_path)
-	reviews_to_bag_of_words(reviews_path, bag_of_words_path)
-	X = get_X(bag_of_words_path)
-	#construction de Y:
-	read_format_all_ratings(ratings_path)
-	Y = get_Y(ratings_path)
-	print(Y)
-"""
-	Z = get_Z(word2vec_path)
-	print(Z)
+    # reading options
+    if '-rm_working_dir' in sys.argv:
+        rm_working_dir_content()
+
+    # construction de X (a refaire)
+    read_format_all_reviews(reviews_path)
+    reviews_to_bag_of_words(reviews_path, bag_of_words_path)
+    X = get_X(bag_of_words_path)
+    # construction de Y:
+    read_format_all_ratings(ratings_path)
+    Y = get_Y(ratings_path)
+    print(Y)
+
+    Z = get_Z(word2vec_path)
+    print(Z)

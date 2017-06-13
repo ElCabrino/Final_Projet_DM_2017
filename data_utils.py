@@ -133,7 +133,6 @@ def get_X(bag_of_words_path):
 #T0D0: version avec le title
 def read_format_rating(from_path, to_path):
 	file = open(to_path,"w+")
-	count=0
 
 	#reading the csv, removing punctuations and stop words
 	with open(from_path) as csvfile:
@@ -141,10 +140,7 @@ def read_format_rating(from_path, to_path):
 		for row in reader:
 			if not row['user_rating']==None:
 				score = row['user_rating']
-				print(score)
-				print(count)
 				file.write(score)
-				count+=1
 				file.write('\n')
 
 """function to read and format all the rating of this tp"""
@@ -166,7 +162,26 @@ def read_format_all_ratings(to_path):
 			with open(rate,'rb') as rated:
 				shutil.copyfileobj(rated, ratings_file)
 			os.remove(rate)
-		
+
+def get_Y_size(rating_path):
+	size=0
+	with open(rating_path, "r") as file:
+		for line in file:
+			size+=1
+
+	return size
+
+def get_Y(rating_path):
+	n = get_Y_size(rating_path)
+	Y = np.zeros((n, 5))
+	itLine = 0
+	with open(rating_path, "r") as ratings:
+		for line in ratings:
+			print(line[0])
+			Y[itLine, int(line[0])-1] = 1
+			itLine+=1
+
+	return Y
 			
 
 

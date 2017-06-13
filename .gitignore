@@ -4,4 +4,5 @@ working_dir/*
 !working_dir/.gitkeep
 word2vec.txt
 word2vec_stem.txt
+dictionnary_final.txt
 

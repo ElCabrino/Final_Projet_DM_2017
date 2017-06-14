@@ -51,15 +51,15 @@ def read_format_review(from_path, to_path, title=False):
 			count+=1
 			# T0D0: ici le code pete
 			# formating the review to remove some rare case
+			
 			row_formatted = row['review']#rm_rare_case(row['review'])
-			for word in re.sub('['+string.punctuation+']', ' ', row_formatted):
+			for word in row_formatted.translate(translator).split():
 				# removing stopwords
 				if not word.lower() in stop:
-					file.write(word + " ")
-			
-			file.write('\n')
+					file.write(word + " ")			
+			file.write(' \n')
 
-	print(count)
+	file.close()
 	# doing steemin
 	os.system('./stemmer.pl < ' + to_path + '.tmp' + ' > ' + to_path)
 	# removing tmp file

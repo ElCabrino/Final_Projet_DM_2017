@@ -12,7 +12,8 @@ def rm_working_dir_content():
 	"""
 	this function delete the content of the working_dir/ folder
 	"""
-	shutil.rmtree('working_dir/')
+	if os.path.exists('working_dir/'):
+		shutil.rmtree('working_dir/')
 	os.makedirs('working_dir')
 	open('working_dir/.gitkeep', 'a').close()
 
@@ -339,3 +340,11 @@ def generate_and_get_X_Y_Z(reviews_path, ratings_path, bag_of_words_path, word2v
 	Z = get_Z(word2vec_stem_path)
 
 	return [X, Y ,Z]
+
+def get_score(index, Y):
+	line =  Y[index, :]
+	count = 1
+	for i in line:
+		if i == 1:
+			return count
+		count += 1

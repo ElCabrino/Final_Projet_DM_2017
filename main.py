@@ -17,7 +17,9 @@ if __name__ == '__main__':
     print(X.shape)
     print(Y.shape)
     print(Z.shape)
-    print(Y[2, :])
-    print(get_score(2, Y))
-    print(Y[10, :])
-    print(get_score(10, Y))
+    
+    X_train, X_test, Y_train, Y_test = shuffle_split(X, Y, 0.75)
+    print(X_train.shape)
+    print(X_test.shape)
+    print(Y_train.shape)
+    print(Y_test.shape)

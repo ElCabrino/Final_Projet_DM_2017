@@ -33,8 +33,8 @@ def read_format_review(from_path, to_path, title=False):
 	"""
 	general function that format a review in a csv file
 	parameters:
-		from_path: where the .csv is stored
-		to_path: where to store the formatted reviews
+			from_path: where the .csv is stored
+			to_path: where to store the formatted reviews
 	"""
 	print('Formating and removing stopwords of ' + from_path + '...', end='')
 	# I use this to remove punctuation
@@ -45,19 +45,19 @@ def read_format_review(from_path, to_path, title=False):
 	for line in open('stop_words.txt', 'r'):
 		stop += [line[:-1]]
 	# reading the csv, removing punctuations and stop words
-	count=0
+	count = 0
 	with open(from_path) as csvfile:
 		reader = csv.DictReader(csvfile, delimiter="\t")
 		for row in reader:
-			count+=1
+			count += 1
 			# T0D0: ici le code pete
 			# formating the review to remove some rare case
-			
-			row_formatted = row['review']#rm_rare_case(row['review'])
+
+			row_formatted = row['review']  # rm_rare_case(row['review'])
 			for word in row_formatted.translate(translator).split():
 				# removing stopwords
 				if not word.lower() in stop:
-					file.write(word + " ")			
+					file.write(word + " ")
 			file.write(' \n')
 
 	file.close()
@@ -72,7 +72,7 @@ def read_format_all_reviews(to_path):
 	"""
 	function to read and format all the reviews of this tp
 	parameters:
-		to_path: where to store 'reviews.txt'
+			to_path: where to store 'reviews.txt'
 	"""
 
 	print('Creating ' + to_path)
@@ -104,7 +104,7 @@ def rm_rare_case(review):
 	function that takes a string as parameter and remove all the pattern that looks like
 	{word}.{word} or {word},{word} ...
 	parameters:
-		review: review to take care of
+			review: review to take care of
 	"""
 	review = re.sub("(\s)([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
 	review = re.sub("([\., \,, \:, \-, \_, \;]+)(?=[a-z])", ' ', review)
@@ -115,7 +115,7 @@ def get_X_size(bag_of_words_path):
 	"""
 	get the size of X store at the first line of bag_of_words_path
 	parameters:
-		bag_of_words_path: where the file is stored
+			bag_of_words_path: where the file is stored
 	"""
 	with open(bag_of_words_path, 'r') as f:
 		size_X_str = f.readline().split()
@@ -128,7 +128,7 @@ def reviews_to_bag_of_words(reviews_path):
 	generates the bag of words representation of the reviews that are in reviews.txt
 	and saves the result in X_f.npy
 	parameters:
-		reviews_path: path of the file reviews.txt
+			reviews_path: path of the file reviews.txt
 	"""
 
 	print('Creating bag of words file ...', end='')
@@ -177,8 +177,8 @@ def read_format_rating(from_path, to_path):
 	"""
 	general function that format a rating
 	parameters:
-		from_path: where the csv is stored
-		to_path: where to store the result
+			from_path: where the csv is stored
+			to_path: where to store the result
 	"""
 	file = open(to_path, "w+")
 
@@ -196,7 +196,7 @@ def read_format_all_ratings(to_path):
 	"""
 	function to read and format all the rating of this tp
 	parameters:
-		to_path: where to store the result
+			to_path: where to store the result
 	"""
 	print('Creating ' + to_path + '...', end='')
 	if os.path.exists(to_path):
@@ -222,6 +222,9 @@ def read_format_all_ratings(to_path):
 
 
 def get_Y_size(rating_path):
+	"""
+	return the number of scores
+	"""
 	size = 0
 	with open(rating_path, "r") as file:
 		for line in file:
@@ -231,6 +234,9 @@ def get_Y_size(rating_path):
 
 
 def get_Y(rating_path):
+	"""
+	Get the matrix Y
+	"""
 	n = get_Y_size(rating_path)
 	Y = np.zeros((n, 5))
 	itLine = 0
@@ -243,6 +249,9 @@ def get_Y(rating_path):
 
 
 def get_Z_size(word2vec_path):
+	"""
+	get the number of words in Z
+	"""
 	with open(word2vec_path, 'r') as f:
 		size_Z_str = f.readline().split()
 		size_Z = int(size_Z_str[0])
@@ -250,6 +259,10 @@ def get_Z_size(word2vec_path):
 
 
 def get_Z(word2vec_path):
+	"""
+	get the matrix Z where the lines are the differentes words and the columns are
+	the values of the word2vec representation
+	"""
 	d = get_Z_size(word2vec_path)
 	Z = np.zeros((d, 200))
 	itLine = 0
@@ -267,6 +280,9 @@ def get_Z(word2vec_path):
 
 
 def create_stem_dict(dictionnary_path, reviews_path):
+	"""
+	creates the custom dictionnary that is used to create X and Z 
+	"""
 	if os.path.exists('word2vec_stem.txt') and os.path.exists('dictionnary_final.txt'):
 		print('Dictionnary and custom word2vec are already generated.')
 		return
@@ -331,6 +347,9 @@ def create_stem_dict(dictionnary_path, reviews_path):
 
 
 def generate_and_get_X_Y_Z(reviews_path, ratings_path, bag_of_words_path, word2vec_stem_path):
+	"""
+	get the matrix X, Y and Z
+	"""
 	read_format_all_reviews(reviews_path)
 	create_stem_dict('dictionnary.txt', reviews_path)
 	reviews_to_bag_of_words(reviews_path)
@@ -339,12 +358,43 @@ def generate_and_get_X_Y_Z(reviews_path, ratings_path, bag_of_words_path, word2v
 	Y = get_Y(ratings_path)
 	Z = get_Z(word2vec_stem_path)
 
-	return [X, Y ,Z]
+	return [X, Y, Z]
+
 
 def get_score(index, Y):
-	line =  Y[index, :]
+	"""
+	get the score in Y at the index 'index'
+	"""
+	line = Y[index, :]
 	count = 1
 	for i in line:
 		if i == 1:
 			return count
 		count += 1
+
+
+def shuffle_split(X, Y, ratio):
+	"""
+	function that shuffles and splits X and Y identically
+	ratio tells how we split the matrix: a ratio of 0.75 splits 75%  of the matrices for the
+	training and 25%  for the test
+	"""
+	size_total = X.shape[0]
+	size_train = round(ratio * size_total)
+
+	#shuffling the matrices
+	randomize = np.arange(len(X))
+	np.random.shuffle(randomize)
+	X = X[randomize, :]
+	Y = Y[randomize, :]
+
+	#splitting the matrices
+	X_train = X[:size_train, :]
+	X_test = X[size_train:, :]
+	Y_train = Y[:size_train, :]
+	Y_test = Y[size_train:, :]
+
+	return X_train, X_test, Y_train, Y_test
+
+
+

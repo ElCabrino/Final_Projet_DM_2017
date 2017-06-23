@@ -10,7 +10,7 @@ def train(trainY):
 	returns : the score that is most prevalent among the instances in trainY
 	"""
 	# we initilise the counters for each score
-	scoreCounter = [0, 0, 0, 0, 0]
+	scoreCounter = np.zeros(5)
 	
 	# we count the number of occurences of each score
 	for i in range(trainY.shape[0]):
@@ -59,7 +59,7 @@ def get_performances(trainY, testY):
 		actualScore = du.get_score(i, testY)
 		
 		# if the score is the majority score we increment the success rate
-		if majorityScore == actualScore:
+		if actualScore == majorityScore:
 			successRate += 1
 
 		# we increment the appropriate element of the confusion matrix

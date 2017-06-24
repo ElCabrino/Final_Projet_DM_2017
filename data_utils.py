@@ -366,7 +366,7 @@ def create_stem_dict(dictionnary_path, reviews_path, titles_path):
 
 def generate_and_get_Xreview_Xtitle_Y_Z(reviews_path, title_path, ratings_path, bag_of_words_reviews_path, bag_of_words_titles_path, word2vec_stem_path):
 	"""
-	get the matrix X, Y and Z
+	get the matrix Xreview, Xtitle, Y and Z
 	"""
 	read_format_all_reviews(reviews_path, title_path)
 	create_stem_dict('dictionnary.txt', reviews_path, title_path)

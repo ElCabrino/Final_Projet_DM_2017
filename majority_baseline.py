@@ -30,10 +30,10 @@ def train(trainY):
 
 def get_performances(trainY, testY):
 	"""
-	@param trainY : a score matrix
-	@param testY : a score matrix containing instances not present in trainY
+	@param trainY : a matrix of five columns for which every row has one column at 1 and the others at 0 indicating what the score is
+	@param testY : a matrix similar to trainY only it contains different instances
 	
-	returns : the model's raw success rate, its confusion matrix as well the training and test times
+	returns : the model's raw success rate, its confusion matrix as well as the training and test times
 	"""
 	# we start the training timer
 	trainingStart = timer.time()
@@ -77,9 +77,11 @@ def get_performances(trainY, testY):
 
 	return [successRate, confusionMatrix, trainingTime, testingTime]
 
-Y = du.get_Y('working_dir/ratings.txt')
+[Xreview, Xtitle, Y, Z] = du.generate_and_get_Xreview_Xtitle_Y_Z('working_dir/reviews.txt', 'working_dir/titles.txt', 'working_dir/ratings.txt', 'working_dir/bag_of_words_reviews.npy', 'working_dir/bag_of_words_titles.npy', 'word2vec_stem.txt')
 
-[sR,cM,trT,teT] = get_performances(Y,Y)
+[Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test] = du.shuffle_split(Xreview, Xtitle, Y, 0.75)
+
+[sR,cM,trT,teT] = get_performances(Y_test,Y_test)
 
 print(sR)
 print(cM)

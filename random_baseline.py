@@ -17,7 +17,7 @@ def get_performances(testY):
 	returns : the model's raw success rate, its confusion matrix and the time necessary to go through all the instances (rows) in testY
 	"""
 	# we start the timer
-	start = timer.time()
+	testingStart = timer.time()
 	
 	# we initialise any necessary variables
 	successRate = 0
@@ -34,13 +34,23 @@ def get_performances(testY):
 			successRate += 1
 
 		# we increment the appropriate element of the confusion matrix 
-		confusionMatrix[guessedScore-1, actualScore-1] += 1
+		confusionMatrix[actualScore-1, guessedScore-1] += 1
 		
 	# we change our measures to percentiles	
 	successRate /= testY.shape[0]
 	confusionMatrix /= testY.shape[0]
 	
 	# we stop the timer
-	end = timer.time()
+	testingEnd = timer.time()
 	
-	return [successRate, confusionMatrix, end-start]
+	testingTime = testingEnd-testingStart	
+	
+	return [successRate, confusionMatrix, testingTime]
+
+Y = du.get_Y('working_dir/ratings.txt')
+
+[sR,cM,teT] = get_performances(Y)
+
+print(sR)
+print(cM)
+print(teT)

@@ -29,7 +29,7 @@ def rm_dict():
 
 
 # T0D0: version avec le title
-def read_format_review(from_path, to_path, title=False):
+def read_format_review(from_path, to_path_review, to_path_title):
 	"""
 	general function that format a review in a csv file
 	parameters:
@@ -39,64 +39,77 @@ def read_format_review(from_path, to_path, title=False):
 	print('Formating and removing stopwords of ' + from_path + '...', end='')
 	# I use this to remove punctuation
 	translator = str.maketrans('', '', string.punctuation)
-	file = open(to_path + '.tmp', "w+")
+	file_review = open(to_path_review + '.tmp', "w+")
+	file_title = open(to_path_title + '.tmp', "w+")
 	stop = []
 	# making the list of stop words
 	for line in open('stop_words.txt', 'r'):
 		stop += [line[:-1]]
 	# reading the csv, removing punctuations and stop words
-	count = 0
 	with open(from_path) as csvfile:
 		reader = csv.DictReader(csvfile, delimiter="\t")
+		#writing in both file the corresponding column
 		for row in reader:
-			count += 1
-			# T0D0: ici le code pete
-			# formating the review to remove some rare case
-
-			row_formatted = row['review']  # rm_rare_case(row['review'])
-			for word in row_formatted.translate(translator).split():
+			for word in row['review'].translate(translator).split():
 				# removing stopwords
 				if not word.lower() in stop:
-					file.write(word + " ")
-			file.write(' \n')
+					file_review.write(word + " ")
+			file_review.write(' \n')
+			for word in row['title'].translate(translator).split():
+				# removing stopwords
+				if not word.lower() in stop:
+					file_title.write(word + " ")
+			file_title.write(' \n')
 
-	file.close()
+	file_review.close()
+	file_title.close()
 	# doing steemin
-	os.system('./stemmer.pl < ' + to_path + '.tmp' + ' > ' + to_path)
+	os.system('./stemmer.pl < ' + to_path_review + '.tmp' + ' > ' + to_path_review)
+	os.system('./stemmer.pl < ' + to_path_title + '.tmp' + ' > ' + to_path_title)
 	# removing tmp file
-	os.remove(to_path + '.tmp')
+	os.remove(to_path_review + '.tmp')
+	os.remove(to_path_title + '.tmp')
 	print(' Done!')
 
 
-def read_format_all_reviews(to_path):
+def read_format_all_reviews(to_path_reviews, to_path_title):
 	"""
 	function to read and format all the reviews of this tp
 	parameters:
 			to_path: where to store 'reviews.txt'
 	"""
 
-	print('Creating ' + to_path)
-	if os.path.exists(to_path):
-		print(to_path + ' already existing.')
+	print('Creating ' + to_path_reviews + ' and ' + to_path_title)
+	if os.path.exists(to_path_reviews):
+		print('Files are already generated.')
 		return
 	files = ['datasets/reviews_always.csv', 'datasets/reviews_gillette.csv',
 			 'datasets/reviews_oral-b.csv', 'datasets/reviews_pantene.csv', 'datasets/reviews_tampax.csv']
 	reviews = ['working_dir/reviews1.txt', 'working_dir/reviews2.txt',
 			   'working_dir/reviews3.txt', 'working_dir/reviews4.txt', 'working_dir/reviews5.txt']
+	titles = ['working_dir/titles1.txt', 'working_dir/titles2.txt',
+			   'working_dir/titles3.txt', 'working_dir/titles4.txt', 'working_dir/titles5.txt']
 	# reading all the reviews
-	read_format_review(files[0], reviews[0])
-	read_format_review(files[1], reviews[1])
-	read_format_review(files[2], reviews[2])
-	read_format_review(files[3], reviews[3])
-	read_format_review(files[4], reviews[4])
+	read_format_review(files[0], reviews[0], titles[0])
+	read_format_review(files[1], reviews[1], titles[1])
+	read_format_review(files[2], reviews[2], titles[2])
+	read_format_review(files[3], reviews[3], titles[3])
+	read_format_review(files[4], reviews[4], titles[4])
 
-	# concatenating in one single file
-	with open(to_path, 'wb') as reviews_file:
+	# concatenating in one single file reviews
+	with open(to_path_reviews, 'wb') as reviews_file:
 		for rev in reviews:
 			with open(rev, 'rb') as revd:
 				shutil.copyfileobj(revd, reviews_file)
 			os.remove(rev)
-	print(to_path + ' created!')
+	print(to_path_reviews + ' created!')
+	# concatenating in one single file titles
+	with open(to_path_title, 'wb') as titles_file:
+		for t in titles:
+			with open(t, 'rb') as td:
+				shutil.copyfileobj(td, titles_file)
+			os.remove(t)
+	print(to_path_title + ' created!')
 
 
 def rm_rare_case(review):
@@ -123,7 +136,7 @@ def get_X_size(bag_of_words_path):
 	return size_X
 
 
-def reviews_to_bag_of_words(reviews_path):
+def reviews_to_bag_of_words(reviews_path, to_path):
 	"""
 	generates the bag of words representation of the reviews that are in reviews.txt
 	and saves the result in X_f.npy
@@ -132,7 +145,7 @@ def reviews_to_bag_of_words(reviews_path):
 	"""
 
 	print('Creating bag of words file ...', end='')
-	if os.path.exists('working_dir/X_f.npy'):
+	if os.path.exists(to_path):
 		print('File already generated.')
 		return
 	d = int(linecache.getline('word2vec_stem.txt', 1).split()[0])
@@ -158,8 +171,8 @@ def reviews_to_bag_of_words(reviews_path):
 					index = dictionnary_final.index(word)
 					X[itLine, index] += 1
 			itLine += 1
-	X_f = 'working_dir/bag_of_words.npy'
-	np.save(X_f, X)
+
+	np.save(to_path, X)
 	print(' Done!')
 	return X
 
@@ -279,7 +292,7 @@ def get_Z(word2vec_path):
 	return Z
 
 
-def create_stem_dict(dictionnary_path, reviews_path):
+def create_stem_dict(dictionnary_path, reviews_path, titles_path):
 	"""
 	creates the custom dictionnary that is used to create X and Z 
 	"""
@@ -310,11 +323,16 @@ def create_stem_dict(dictionnary_path, reviews_path):
 	os.remove('dictionnary_stem.tmp')
 	print(' Done!')
 
-	# on regarde tout les mots dans reviews.txt
-	print('Removing words that are not in ' + reviews_path + '...', end='')
+	# on regarde tout les mots dans reviews.txt et titles.txt
+	print('Removing words that are not in ' + reviews_path + ' and ' + titles_path + '...', end='')
 	unique_words_reviews = []
 	with open(reviews_path, 'r') as reviews_f:
 		for line in reviews_f:
+			for word in line.split():
+				if not word in unique_words_reviews:
+					unique_words_reviews.append(word)
+	with open(titles_path, 'r') as titles_f:
+		for line in titles_f:
 			for word in line.split():
 				if not word in unique_words_reviews:
 					unique_words_reviews.append(word)
@@ -346,19 +364,21 @@ def create_stem_dict(dictionnary_path, reviews_path):
 	os.remove('dictionnary_stem.txt')
 
 
-def generate_and_get_X_Y_Z(reviews_path, ratings_path, bag_of_words_path, word2vec_stem_path):
+def generate_and_get_Xreview_Xtitle_Y_Z(reviews_path, title_path, ratings_path, bag_of_words_reviews_path, bag_of_words_titles_path, word2vec_stem_path):
 	"""
 	get the matrix X, Y and Z
 	"""
-	read_format_all_reviews(reviews_path)
-	create_stem_dict('dictionnary.txt', reviews_path)
-	reviews_to_bag_of_words(reviews_path)
+	read_format_all_reviews(reviews_path, title_path)
+	create_stem_dict('dictionnary.txt', reviews_path, title_path)
+	reviews_to_bag_of_words(reviews_path, bag_of_words_reviews_path) #bag of words for the reviews
+	reviews_to_bag_of_words(title_path, bag_of_words_titles_path) #bag of words for the titles
 	read_format_all_ratings(ratings_path)
-	X = get_X(bag_of_words_path)
+	Xreview = get_X(bag_of_words_reviews_path)
+	Xtitle = get_X(bag_of_words_titles_path)
 	Y = get_Y(ratings_path)
 	Z = get_Z(word2vec_stem_path)
 
-	return [X, Y, Z]
+	return [Xreview, Xtitle, Y, Z]
 
 
 def get_score(index, Y):
@@ -395,6 +415,17 @@ def shuffle_split(X, Y, ratio):
 	Y_test = Y[size_train:, :]
 
 	return X_train, X_test, Y_train, Y_test
+
+
+def Y_to_vect(Y):
+	vect_Y = np.zeros([Y.shape[0]])
+	print('shape :' + str(Y.shape[0]))
+	count = 0
+	for line in Y:
+		score = get_score(count, Y)
+		vect_Y[count] = score
+		count+=1
+	return vect_Y
 
 
 

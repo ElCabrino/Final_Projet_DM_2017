@@ -393,28 +393,31 @@ def get_score(index, Y):
 		count += 1
 
 
-def shuffle_split(X, Y, ratio):
+def shuffle_split(Xreview, Xtitle, Y, ratio):
 	"""
 	function that shuffles and splits X and Y identically
 	ratio tells how we split the matrix: a ratio of 0.75 splits 75%  of the matrices for the
 	training and 25%  for the test
 	"""
-	size_total = X.shape[0]
+	size_total = Xreview.shape[0]
 	size_train = round(ratio * size_total)
 
 	#shuffling the matrices
-	randomize = np.arange(len(X))
+	randomize = np.arange(len(Xreview))
 	np.random.shuffle(randomize)
-	X = X[randomize, :]
+	Xreview = Xreview[randomize, :]
+	Xtitle = Xtitle[randomize, :]
 	Y = Y[randomize, :]
 
 	#splitting the matrices
-	X_train = X[:size_train, :]
-	X_test = X[size_train:, :]
+	Xreview_train = Xreview[:size_train, :]
+	Xreview_test = Xreview[size_train:, :]
+	Xtitle_train = Xtitle[:size_train, :]
+	Xtitle_test = Xtitle[size_train:, :]
 	Y_train = Y[:size_train, :]
 	Y_test = Y[size_train:, :]
 
-	return X_train, X_test, Y_train, Y_test
+	return [Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test]
 
 
 def Y_to_vect(Y):

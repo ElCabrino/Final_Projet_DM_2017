@@ -98,9 +98,11 @@ def get_performances(trainY, testY):
 
 	return [successRate, confusionMatrix, trainingTime, testingTime]
 
-Y = du.get_Y('working_dir/ratings.txt')
+[Xreview, Xtitle, Y, Z] = du.generate_and_get_Xreview_Xtitle_Y_Z('working_dir/reviews.txt', 'working_dir/titles.txt', 'working_dir/ratings.txt', 'working_dir/bag_of_words_reviews.npy', 'working_dir/bag_of_words_titles.npy', 'word2vec_stem.txt')
 
-[sR,cM,trT,teT] = get_performances(Y,Y)
+[Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test] = du.shuffle_split(Xreview, Xtitle, Y, 0.75)
+
+[sR,cM,trT,teT] = get_performances(Y_test,Y_test)
 
 print(sR)
 print(cM)

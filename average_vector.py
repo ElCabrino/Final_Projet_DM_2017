@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import spatial
 import time as timer
 
 import data_utils as du
@@ -9,10 +10,11 @@ def train(trainX, trainY, Z):
 	@param trainY : a matrix of five columns for which every row has one column at 1 and the others at 0 indicating what the score is
 	@param Z : a matrix for which every row is a vector representing a word
 
-	returns : the average vector for every score
+	returns : the average vector for every score as well as the covariance matrix
 	"""
 	# we start by declaring the necessary variables
 	scoreVectors = np.zeros((5, Z.shape[1]))
+	instanceVectors = np.zeros((trainX.shape[0], Z.shape[1]))
 	instanceCounts = np.zeros(5)
 
 	# we then go through the instances
@@ -20,23 +22,25 @@ def train(trainX, trainY, Z):
 		# we get the instance's score
 		score = du.get_score(i, trainY)
 		# we then go through the instance to get the scores' sum of average vectors
-		instanceVector = np.zeros(Z.shape[1])
 		vectorCount = 0
 		for j in range(trainX.shape[1]):
 			if trainX[i, j] != 0:
-				instanceVector += trainX[i, j]*Z[j, :]
+				instanceVectors[i, :] += trainX[i, j]*Z[j, :]
 				vectorCount += trainX[i, j]
 
-		scoreVectors[score-1, :] += instanceVector/vectorCount
+		scoreVectors[score-1, :] += instanceVectors[i, :]/vectorCount
 		instanceCounts[score-1] += 1
 	
 	# we get the average vector of a score
 	for i in range(5):
 		scoreVectors[i, :] /= instanceCounts[i]
 
-	return scoreVectors
+	# we get covariance for mahalanobis
+	instanceCov = np.cov(instanceVectors, rowvar = 0)
+	
+	return [scoreVectors, instanceCov]
 
-def guess_score(xRow, Z, scoreVectors):
+def guess_score(xRow, Z, scoreVectors, trainInstanceCov):
 	"""
 	@param xRow : a bag of words representation of an instance
 	@param Z : a matrix for which every row is a vector representing a word
@@ -62,9 +66,9 @@ def guess_score(xRow, Z, scoreVectors):
 	minScoreDist = np.inf
 	
 	for i in range(5):
-		if np.linalg.norm(averageVector-scoreVectors[i, :]) < minScoreDist:
+		if spatial.distance.mahalanobis(averageVector, scoreVectors[i, :], np.linalg.inv(trainInstanceCov)) < minScoreDist:
 			score = i+1
-			minScoreDist = np.linalg.norm(averageVector-scoreVectors[i, :])
+			minScoreDist = spatial.distance.mahalanobis(averageVector, scoreVectors[i, :], np.linalg.inv(trainInstanceCov))
 	
 	return score
 
@@ -81,7 +85,7 @@ def get_performances(trainX, testX, trainY, testY, Z):
 	trainingStart = timer.time()
 	
 	# we get the average score vector
-	scoreVectors = train(trainX, trainY, Z)
+	[scoreVectors, instanceTrainCov] = train(trainX, trainY, Z)
 
 	# we stop the training timer
 	trainingEnd = timer.time()
@@ -100,7 +104,7 @@ def get_performances(trainX, testX, trainY, testY, Z):
 	for i in range(testX.shape[0]):
 		# we get the actual score and the estimated score
 		actualScore = du.get_score(i, testY)
-		guessedScore = guess_score(testX[i, :], Z, scoreVectors)
+		guessedScore = guess_score(testX[i, :], Z, scoreVectors, instanceTrainCov)
 
 		# if the score is correct we increment the success rate
 		if actualScore == guessedScore:

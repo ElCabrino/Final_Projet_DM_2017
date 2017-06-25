@@ -12,22 +12,27 @@ def train(trainX, trainY, Z):
 	returns : the average vector for every score
 	"""
 	# we start by declaring the necessary variables
-	scoreVectors = np.zeros((5,Z.shape[1]))
-	vectorCounts = np.zeros(5)
+	scoreVectors = np.zeros((5, Z.shape[1]))
+	instanceCounts = np.zeros(5)
 
 	# we then go through the instances
 	for i in range(trainX.shape[0]):
 		# we get the instance's score
 		score = du.get_score(i, trainY)
-		# we then go through the instance to get the scores' sum of vectors
+		# we then go through the instance to get the scores' sum of average vectors
+		instanceVector = np.zeros(Z.shape[1])
+		vectorCount = 0
 		for j in range(trainX.shape[1]):
 			if trainX[i, j] != 0:
-				scoreVectors[score-1, :] += trainX[i, j]*Z[j, :]
-				vectorCounts[score-1] += trainX[i, j]
+				instanceVector += trainX[i, j]*Z[j, :]
+				vectorCount += trainX[i, j]
+
+		scoreVectors[score-1, :] += instanceVector/vectorCount
+		instanceCounts[score-1] += 1
 	
 	# we get the average vector of a score
 	for i in range(5):
-		scoreVectors[i, :] /= vectorCounts[i]
+		scoreVectors[i, :] /= instanceCounts[i]
 
 	return scoreVectors
 
@@ -53,13 +58,13 @@ def guess_score(xRow, Z, scoreVectors):
 	averageVector /= vectorCount
 
 	# we find the nearest score average vector to the instance average vector
-	score = 1
-	minScoreDist = np.linalg.norm(averageVector-scoreVectors[0, :])
+	score = 0
+	minScoreDist = np.inf
 	
-	for i in range(4):
-		if np.linalg.norm(averageVector-scoreVectors[i+1, :]) < minScoreDist:
-			score = i+2
-			minScoreDist = np.linalg.norm(averageVector-scoreVectors[i+1, :])
+	for i in range(5):
+		if np.linalg.norm(averageVector-scoreVectors[i, :]) < minScoreDist:
+			score = i+1
+			minScoreDist = np.linalg.norm(averageVector-scoreVectors[i, :])
 	
 	return score
 

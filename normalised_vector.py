@@ -16,12 +16,14 @@ def train(trainX, trainY, Z):
 
 	# we go through the instances
 	for i in range(trainX.shape[0]):
-		# we get the instanceŝ score
+		# we get the instance's score
 		score = du.get_score(i, trainY)
+		instanceVector = np.zeros(Z.shape[1])
 		for j in range(trainX.shape[1]):
 			# we sum up the present word vectors
 			if trainX[i, j] != 0:
-				scoreVectors[score-1, :] += trainX[i, j]*Z[j, :]
+				instanceVector += trainX[i, j]*Z[j, :]
+		scoreVectors[score-1, :] += instanceVector/np.linalg.norm(instanceVector)
 	
 	# we normalise the vectors
 	for i in range(5):
@@ -52,10 +54,10 @@ def guess_score(xRow, Z, scoreVectors):
 	score = 1
 	minScoreDist = np.linalg.norm(averageVector-scoreVectors[0, :])
 	
-	for i in range(4):
-		if np.linalg.norm(averageVector-scoreVectors[i+1, :]) < minScoreDist:
-			score = i+2
-			minScoreDist = np.linalg.norm(averageVector-scoreVectors[i+1, :])
+	for i in range(5):
+		if np.linalg.norm(averageVector-scoreVectors[i, :]) < minScoreDist:
+			score = i+1
+			minScoreDist = np.linalg.norm(averageVector-scoreVectors[i, :])
 	
 	return score
 

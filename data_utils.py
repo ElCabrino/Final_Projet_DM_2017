@@ -422,7 +422,6 @@ def shuffle_split(Xreview, Xtitle, Y, ratio):
 
 def Y_to_vect(Y):
 	vect_Y = np.zeros([Y.shape[0]])
-	print('shape :' + str(Y.shape[0]))
 	count = 0
 	for line in Y:
 		score = get_score(count, Y)

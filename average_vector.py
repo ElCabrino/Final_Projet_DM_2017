@@ -156,7 +156,6 @@ def get_performances(reviewTrainX, reviewTestX, titleTrainX, titleTestX, trainY,
 
 	# we convert the measures to percentiles
 	successRate /= reviewTestX.shape[0]
-	confusionMatrix /= reviewTestX.shape[0]
 
 	# we stop the testing timer
 	testingEnd = timer.time()
@@ -170,7 +169,7 @@ def get_performances(reviewTrainX, reviewTestX, titleTrainX, titleTestX, trainY,
 
 [Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test] = du.shuffle_split(Xreview, Xtitle, Y, 0.75)
 
-	
+# dernier param varie entre 0 et 1
 [sR,cM,trT,teT] = get_performances(Xreview_train,Xreview_test,Xtitle_train,Xtitle_test,Y_train,Y_test,Z,0)
 
 print(sR)

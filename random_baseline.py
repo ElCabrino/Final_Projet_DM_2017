@@ -38,7 +38,6 @@ def get_performances(testY):
 		
 	# we change our measures to percentiles	
 	successRate /= testY.shape[0]
-	confusionMatrix /= testY.shape[0]
 	
 	# we stop the timer
 	testingEnd = timer.time()

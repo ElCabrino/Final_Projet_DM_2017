@@ -114,7 +114,6 @@ def get_performances(reviewTrainX, reviewTestX, titleTrainX, titleTestX, trainY,
 		confusionMatrix[actualScore-1, guessedScore-1] += 1	
 
 	successRate /= reviewTestX.shape[0]
-	confusionMatrix /= reviewTestX.shape[0]
 	
 	testingEnd = timer.time()
 
@@ -126,6 +125,7 @@ def get_performances(reviewTrainX, reviewTestX, titleTrainX, titleTestX, trainY,
 
 [Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test] = du.shuffle_split(Xreview, Xtitle, Y, 0.75)
 
+# le dernier param est un nombre qui varie entre 0 et 1
 [sR,cM,trT,teT] = get_performances(Xreview_train,Xreview_test,Xtitle_train,Xtitle_test,Y_train,Y_test,0)
 
 print(sR)

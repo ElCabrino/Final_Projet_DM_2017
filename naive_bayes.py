@@ -65,19 +65,26 @@ def guess_score(xRow, wordConditionalProb, scoreProb):
 	
 	return score
 
-def get_performances(trainX, testX, trainY, testY):
+def get_performances(reviewTrainX, reviewTestX, titleTrainX, titleTestX, trainY, testY, reviewRatio):
 	"""
-	@param trainX : a matrix containing the training instances in bag of words format
-	@param testX : a matrix similar to trainX but with different instances
+	@param reviewTrainX : a matrix containing the training instances' review content in bag of words format
+	@param reviewTestX : a matrix similar to reviewTrainX but with different instances
+	@param titleTrainX : a matrix containing the training instances' title content in bag of words format
+	@param titleTestX : a matrix containing the testing instances' title content in bag of words format
 	@param trainY : a matrix containing the score of trainX's instances
 	@param testY : a matrix containing the scores of the testX instances
+	@param reviewRatio : a number between 0 and 1 indicating the importance given to review content when guessing a score
 
 	returns : the model's raw success rate, its confusion matrix and the training and testing times
 	"""
 	# we do a timed training
 	trainingStart = timer.time()
 
-	[wordConditionalProb, scoreProb] = train(trainX, trainY)
+	# we train aspects if they will be used to guess
+	if reviewRatio != 0:
+		[reviewWordConditionalProb, reviewScoreProb] = train(reviewTrainX, trainY)
+	if reviewRatio != 1:
+		[titleWordConditionalProb, titleScoreProb] = train(titleTrainX, trainY)
 
 	trainingEnd = timer.time()
 
@@ -89,17 +96,25 @@ def get_performances(trainX, testX, trainY, testY):
 	successRate = 0
 	confusionMatrix = np.zeros((5,5))
 
-	for i in range(testX.shape[0]):
+	for i in range(reviewTestX.shape[0]):
 		actualScore = du.get_score(i, testY)
-		guessedScore = guess_score(testX[i, :], wordConditionalProb, scoreProb)
+		# we compute the guesses if they are to be taken into account
+		reviewGuessedScore = 0
+		if reviewRatio != 0:
+			reviewGuessedScore = guess_score(reviewTestX[i, :], reviewWordConditionalProb, reviewScoreProb)
+		titleGuessedScore = 0
+		if reviewRatio != 1:
+			titleGuessedScore = guess_score(titleTestX[i, :], titleWordConditionalProb, titleScoreProb)
+
+		guessedScore = int(round(reviewRatio*reviewGuessedScore+(1-reviewRatio)*titleGuessedScore))
 	
 		if actualScore == guessedScore:
 			successRate += 1
 
 		confusionMatrix[actualScore-1, guessedScore-1] += 1	
 
-	successRate /= testX.shape[0]
-	confusionMatrix /= testX.shape[0]
+	successRate /= reviewTestX.shape[0]
+	confusionMatrix /= reviewTestX.shape[0]
 	
 	testingEnd = timer.time()
 
@@ -111,9 +126,10 @@ def get_performances(trainX, testX, trainY, testY):
 
 [Xreview_train, Xreview_test, Xtitle_train, Xtitle_test, Y_train, Y_test] = du.shuffle_split(Xreview, Xtitle, Y, 0.75)
 
-[sR,cM,trT,teT] = get_performances(Xreview_train,Xreview_test,Y_train,Y_test)
+[sR,cM,trT,teT] = get_performances(Xreview_train,Xreview_test,Xtitle_train,Xtitle_test,Y_train,Y_test,0)
 
 print(sR)
 print(cM)
 print(trT)
 print(teT)
+

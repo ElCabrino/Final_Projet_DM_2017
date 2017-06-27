@@ -7,7 +7,6 @@ import random_baseline as rand_baseline
 import naive_bayes_baseline as bayes_baseline
 import majority_baseline
 import average_vector
-import naive_bayes
 import normalised_vector
 import modified_bayesian_spam_filter as spam_filter
 import linear_regression

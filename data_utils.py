@@ -406,7 +406,7 @@ def shuffle_split(Xreview, Xtitle, Y, ratio):
     @param ratio: between 0 and 1. Tells how to split the matrix. 0.75 means 75%, of the 2 matrices
     is for training and 25%, for the testing.
     
-    return: the splitted matrices
+    return: the shuffled and splitted matrices
     """
     size_total = Xreview.shape[0]
     size_train = round(ratio * size_total)

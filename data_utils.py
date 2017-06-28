@@ -50,6 +50,7 @@ def read_format_review(from_path, to_path_review, to_path_title):
         reader = csv.DictReader(csvfile, delimiter="\t")
         # writing in both file the corresponding column
         for row in reader:
+            #removing the punctuation with the translator
             for word in row['review'].translate(translator).split():
                 # removing stopwords
                 if not word.lower() in stop:
